@@ -1,0 +1,24 @@
+[window_mode]
+width = 512
+height = 512
+maximized = false
+fullscreen_type = "Windowed"
+borderless = false
+transparent = false
+min_width = 512
+min_height = 512
+max_width = 512
+max_height = 512
+resizable = false
+visible = true
+resize_on_scale_factor_change = false
+
+[window_setup]
+title = "Chess"
+samples = "One"
+vsync = true
+icon = ""
+srgb = true
+
+[backend]
+type = 'All'
