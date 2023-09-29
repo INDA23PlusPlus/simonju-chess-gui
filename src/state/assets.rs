@@ -72,4 +72,21 @@ impl Assets {
             x => Err(GameError::CustomError(format!("Invalid piece color: {}", x))),
         }
     }
+
+    fn as_array(&self) -> [&graphics::Image; 12] {
+        [
+            &self.white_pawn, 
+            &self.white_bishop,
+            &self.white_knight,
+            &self.white_rook,
+            &self.white_queen,
+            &self.white_king,
+            &self.black_pawn, 
+            &self.black_bishop,
+            &self.black_knight,
+            &self.black_rook,
+            &self.black_queen,
+            &self.black_king,
+        ]
+    }
 }
