@@ -1,7 +1,5 @@
 extern crate olindba_chess;
 
-use std::collections::HashSet;
-
 use ggez::*;
 
 use olindba_chess::*;

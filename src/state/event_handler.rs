@@ -1,4 +1,4 @@
-use ggez::{*, input::keyboard::KeyInput};
+use ggez::*;
 use crate::state::*;
 
 mod draw;
@@ -37,7 +37,7 @@ impl ggez::event::EventHandler<GameError> for State {
 
     fn key_down_event(
             &mut self,
-            context: &mut Context,
+            _context: &mut Context,
             input: input::keyboard::KeyInput,
             _repeated: bool,
         ) -> Result<(), GameError> {

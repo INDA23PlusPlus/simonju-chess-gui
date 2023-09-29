@@ -2,7 +2,7 @@ mod state;
 
 use state::*;
 
-use ggez::{*, conf::WindowSetup};
+use ggez::*;
 
 /* Todo
  * There seems to be an issue when promoting pieces letting the player move twice.

@@ -5,7 +5,7 @@ use crate::state::*;
 impl State {
     pub(crate) fn handle_mouse_button_down(
         &mut self,
-        context: &mut Context,
+        _context: &mut Context,
         button: event::MouseButton,
         x_pos: f32,
         y_pos: f32,
@@ -30,11 +30,11 @@ impl State {
     
     pub(crate) fn handle_mouse_motion(
         &mut self,
-        context: &mut Context,
+        _context: &mut Context,
         x_pos: f32,
         y_pos: f32,
-        x_delta: f32,
-        y_delta: f32,
+        _x_delta: f32,
+        _y_delta: f32,
     ) -> GameResult {
         let row = Self::snap_to_board(y_pos);
         let col = Self::snap_to_board(x_pos);

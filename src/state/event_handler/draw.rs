@@ -1,4 +1,4 @@
-use ggez::{*, graphics::{Color, Image, Rect, Sampler}};
+use ggez::{*, graphics::{Color, Rect, Sampler}};
 
 use crate::state::*;
 
@@ -7,6 +7,7 @@ const TILE_DIMENSIONS: f32 = 64.0;
 // source: http://omgchess.blogspot.com/2015/09/chess-board-color-schemes.html
 const DARK: (u8, u8, u8) = (184, 139, 74);
 const LIGHT: (u8, u8, u8) = (227, 193, 111);
+
 const SELECT: (u8, u8, u8, u8) = (139, 171, 112, 192);
 const MOVES: (u8, u8, u8, u8) = (173, 216, 230, 128);
 
@@ -54,7 +55,7 @@ impl State {
         )?;
         canvas.draw(&select, graphics::DrawParam::default());
 
-        let mut moves = graphics::Mesh::new_rectangle(
+        let moves = graphics::Mesh::new_rectangle(
             context,
             graphics::DrawMode::fill(),
             graphics::Rect::new(0.0, 0.0, TILE_DIMENSIONS, TILE_DIMENSIONS),
@@ -97,7 +98,7 @@ impl State {
                     _ => (),
                 }
             },
-            GameState::DrawBy50MoveRule | GameState::InsufficientMaterial | GameState::DrawBy50MoveRule => {
+            GameState::DrawBy50MoveRule | GameState::InsufficientMaterial | GameState::Stalemate => {
                 canvas.draw(&self.assets.draw_screen, graphics::DrawParam::default()
                 .dest_rect(screen));
             },
@@ -105,6 +106,7 @@ impl State {
         }
 
         canvas.finish(context)?;
+
         Ok(())
     }
 
