@@ -1,4 +1,4 @@
-use ggez::*;
+use ggez::{*, input::keyboard::KeyInput};
 use crate::state::*;
 
 mod draw;
@@ -33,5 +33,18 @@ impl ggez::event::EventHandler<GameError> for State {
             y_delta: f32,
         ) -> GameResult {
         self.handle_mouse_motion(context, x_pos, y_pos, x_delta, y_delta)
+    }
+
+    fn key_down_event(
+            &mut self,
+            context: &mut Context,
+            input: input::keyboard::KeyInput,
+            _repeated: bool,
+        ) -> Result<(), GameError> {
+        match input.keycode {
+            Some(input::keyboard::KeyCode::R) => self.reset(),
+            _ => (),
+        }
+        Ok(())
     }
 }

@@ -15,6 +15,9 @@ pub(crate) struct Assets {
     black_rook: graphics::Image,
     black_queen: graphics::Image,
     black_king: graphics::Image,
+    pub(crate) white_win_screen: graphics::Image,
+    pub(crate) black_win_screen: graphics::Image,
+    pub(crate) draw_screen: graphics::Image,
 }
 
 impl Assets {
@@ -33,6 +36,10 @@ impl Assets {
         let black_queen = graphics::Image::from_path(context,   "/black_queen.png")?;
         let black_king = graphics::Image::from_path(context,    "/black_king.png")?;
 
+        let white_win_screen = graphics::Image::from_path(context, "/white_win_screen.png")?;
+        let black_win_screen = graphics::Image::from_path(context, "/black_win_screen.png")?;
+        let draw_screen = graphics::Image::from_path(context, "/draw_screen.png")?;
+
         Ok(Assets {
             white_pawn,
             white_bishop,
@@ -46,6 +53,9 @@ impl Assets {
             black_rook,
             black_queen,
             black_king,
+            white_win_screen,
+            black_win_screen,
+            draw_screen,
         })
     }
 
@@ -71,22 +81,5 @@ impl Assets {
             },
             x => Err(GameError::CustomError(format!("Invalid piece color: {}", x))),
         }
-    }
-
-    fn as_array(&self) -> [&graphics::Image; 12] {
-        [
-            &self.white_pawn, 
-            &self.white_bishop,
-            &self.white_knight,
-            &self.white_rook,
-            &self.white_queen,
-            &self.white_king,
-            &self.black_pawn, 
-            &self.black_bishop,
-            &self.black_knight,
-            &self.black_rook,
-            &self.black_queen,
-            &self.black_king,
-        ]
     }
 }

@@ -54,7 +54,6 @@ impl State {
         )?;
         canvas.draw(&select, graphics::DrawParam::default());
 
-
         let mut moves = graphics::Mesh::new_rectangle(
             context,
             graphics::DrawMode::fill(),
@@ -81,6 +80,28 @@ impl State {
                 );
                 canvas.draw(&moves, graphics::DrawParam::default().dest_rect(dst));
             }
+        }
+
+        // End Screen Layer
+        let screen = graphics::Rect::new(
+            0.0,
+            0.0,
+            16.0,
+            16.0,
+        );
+        match self.chess_board.get_game_state() {
+            GameState::Checkmate => {
+                match self.chess_board.turn {
+                    WHITE => canvas.draw(&self.assets.black_win_screen, graphics::DrawParam::default().dest_rect(screen)),
+                    BLACK => canvas.draw(&self.assets.white_win_screen, graphics::DrawParam::default().dest_rect(screen)),
+                    _ => (),
+                }
+            },
+            GameState::DrawBy50MoveRule | GameState::InsufficientMaterial | GameState::DrawBy50MoveRule => {
+                canvas.draw(&self.assets.draw_screen, graphics::DrawParam::default()
+                .dest_rect(screen));
+            },
+            _ => (),
         }
 
         canvas.finish(context)?;

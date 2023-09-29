@@ -54,6 +54,10 @@ impl State {
     }
 
     fn make_selection(&mut self) -> GameResult {
+        if self.chess_board.get_legal_moves(self.selected_tile_index).is_empty() {
+            return Ok(())
+        }
+
         let selected_piece = self.chess_board.board[self.selected_tile_index];
 
         match selected_piece.get_color() {
@@ -95,10 +99,23 @@ impl State {
 
     fn make_move(&mut self) -> GameResult {
         if let Some(piece) = self.selected_piece_index {
+            let current_turn = self.chess_board.turn; // Fix for promotion error.
             for legal_move in self.chess_board.get_legal_moves(piece) {
                 if legal_move.get_from() == piece && legal_move.get_to() == self.selected_tile_index {
                     self.chess_board.make_move(legal_move);
                     self.selected_piece_index = None;
+                    match self.chess_board.get_game_state() {
+                        GameState::InProgress | 
+                        GameState::Check => (),
+                        GameState::Checkmate |
+                        GameState::DrawBy50MoveRule | 
+                        GameState::InsufficientMaterial | 
+                        GameState::Stalemate => self.is_end = false,
+                    }
+                    // Fix for promotion error.
+                    if current_turn == self.chess_board.turn {
+                        self.chess_board.turn ^= 1;
+                    }
                 } else {
                     self.selected_piece_index = None;
                 }

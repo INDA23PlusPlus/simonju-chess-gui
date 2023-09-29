@@ -18,6 +18,7 @@ pub(crate) struct State {
     selected_tile_index: usize,
     selected_tile_pos: (usize, usize),
     selected_piece_index: Option<usize>,
+    is_end: bool,
 }
 
 impl State {
@@ -29,9 +30,16 @@ impl State {
             selected_tile_index: 0,
             selected_tile_pos: (0, 0),
             selected_piece_index: None,
+            is_end: true,
         };
         
         Ok(game_state)
+    }
+
+    pub fn reset(&mut self) {
+            self.chess_board = Game::starting_position();
+            self.selected_piece_index = None;
+            self.is_end = true;
     }
 }
 
