@@ -1,5 +1,4 @@
 use ggez::*;
-
 use olindba_chess::*;
 
 pub(crate) struct Assets {

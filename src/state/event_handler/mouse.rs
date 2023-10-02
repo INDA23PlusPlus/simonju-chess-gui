@@ -1,5 +1,4 @@
 use ggez::*;
-
 use crate::state::*;
 
 impl State {
@@ -36,6 +35,7 @@ impl State {
         _x_delta: f32,
         _y_delta: f32,
     ) -> GameResult {
+        self.mouse_pos = Point2 {x: x_pos, y: y_pos };
         let row = Self::snap_to_board(y_pos);
         let col = Self::snap_to_board(x_pos);
 

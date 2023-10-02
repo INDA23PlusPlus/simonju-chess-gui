@@ -1,5 +1,4 @@
-use ggez::{*, graphics::{Color, Rect, Sampler}};
-
+use ggez::{*, graphics::{Color, Rect, Sampler}, input::mouse::MouseContext};
 use crate::state::*;
 
 const TILE_DIMENSIONS: f32 = 64.0;
@@ -36,8 +35,10 @@ impl State {
         // Pieces Layer
         for tile in 0..64 {
             if let Ok(image) = self.assets.get_image_from_piece(self.chess_board.board[tile]) {
-                canvas.draw(image, graphics::DrawParam::default()
+                if self.selected_piece_index != Some(tile) {
+                    canvas.draw(image, graphics::DrawParam::default()
                     .dest_rect(Self::index_to_rect(tile)));
+                }
             }
         }
 
@@ -80,6 +81,14 @@ impl State {
                     1.0,
                 );
                 canvas.draw(&moves, graphics::DrawParam::default().dest_rect(dst));
+            }
+        }
+
+        // Selected Piece Layer
+        if let Some(piece) = self.selected_piece_index {
+            if let Ok(image) = self.assets.get_image_from_piece(self.chess_board.board[piece]) {
+                canvas.draw(image, graphics::DrawParam::default()
+                .dest_rect(Rect::new(self.mouse_pos.x - 32.0, self.mouse_pos.y - 32.0, 4.0, 4.0)));
             }
         }
 

@@ -1,9 +1,6 @@
-extern crate olindba_chess;
-
-use ggez::*;
-
+use std::net::{TcpListener, TcpStream};
+use ggez::{*, mint::Point2};
 use olindba_chess::*;
-
 use assets::*;
 
 mod event_handler;
@@ -17,6 +14,7 @@ pub(crate) struct State {
     selected_tile_pos: (usize, usize),
     selected_piece_index: Option<usize>,
     is_end: bool,
+    mouse_pos: Point2<f32>,
 }
 
 impl State {
@@ -29,6 +27,7 @@ impl State {
             selected_tile_pos: (0, 0),
             selected_piece_index: None,
             is_end: true,
+            mouse_pos: Point2 { x: 0.0, y: 0.0 },
         };
         
         Ok(game_state)
