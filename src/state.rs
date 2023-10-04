@@ -7,12 +7,6 @@ use crate::board::*;
 mod event_handler;
 mod assets;
 
-enum GameMode {
-    Local,
-    Server,
-    Client,
-}
-
 pub(crate) struct State<T: Board> {
     chess_board: T,
     assets: Assets,

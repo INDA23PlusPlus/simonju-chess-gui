@@ -1,4 +1,4 @@
-use ggez::{*, graphics::{Color, Rect, Sampler}, input::mouse::MouseContext};
+use ggez::{*, graphics::{Color, Rect, Sampler}};
 use crate::state::*;
 
 const TILE_DIMENSIONS: f32 = 64.0;
@@ -118,11 +118,11 @@ impl<T: Board> State<T> {
         graphics::Rect::new(col * TILE_DIMENSIONS, row * TILE_DIMENSIONS, 4.0, 4.0)
     }
 
-    fn as_row(i: usize) -> f32 {
+    pub(crate) fn as_row(i: usize) -> f32 {
         (i / 8) as f32
     }
 
-    fn as_col(i: usize) -> f32 {
+    pub(crate) fn as_col(i: usize) -> f32 {
         (i % 8) as f32
     }
 }

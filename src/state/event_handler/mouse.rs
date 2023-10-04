@@ -73,27 +73,6 @@ impl<T: Board> State<T> {
             _ => (),
         }
 
-        /* DEBUG */
-        let mut piece = String::new();
-        match selected_piece.get_color() {
-            WHITE => piece.push_str("White "),
-            BLACK => piece.push_str("Black "),
-            _ => (),
-        }
-        match selected_piece.get_type() {
-            PAWN => piece.push_str("Pawn "),
-            BISHOP => piece.push_str("Bishop "),
-            KNIGHT => piece.push_str("Knight "),
-            ROOK => piece.push_str("Rook "),
-            QUEEN => piece.push_str("Queen "),
-            KING => piece.push_str("King "),
-            _ => piece.clear(),
-        }
-        if !piece.is_empty() {
-            piece.push_str("Selected!");
-        }
-        println!("{piece}");
-
         Ok(())
     }
 

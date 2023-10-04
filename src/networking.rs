@@ -4,7 +4,7 @@ extern crate olindba_chess;
 use std::net::{TcpListener, TcpStream};
 use ggez::*;
 use chess_network_protocol::*;
-use olindba_chess::{Game, Piece};
+use serde_json::{Deserializer, de::IoRead};
 
 use crate::board::Ply;
 
@@ -43,7 +43,7 @@ impl ClientGame {
 impl ServerGame {
     pub fn new(addr: String) -> GameResult<ServerGame> {
         let listener = TcpListener::bind(addr)?;
-        let stream = (&listener).accept()?.0;
+        let (stream, _addr) = (&listener).accept()?;
         let board = olindba_chess::Game::starting_position();
 
         Ok(Self {
