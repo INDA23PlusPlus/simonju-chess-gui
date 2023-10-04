@@ -400,6 +400,7 @@ dependencies = [
  "chess-network-protocol",
  "ggez",
  "olindba-chess",
+ "serde_json",
 ]
 
 [[package]]

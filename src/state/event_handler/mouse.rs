@@ -1,7 +1,7 @@
 use ggez::*;
 use crate::state::*;
 
-impl State {
+impl<T: Board> State<T> {
     pub(crate) fn handle_mouse_button_down(
         &mut self,
         _context: &mut Context,
@@ -54,15 +54,15 @@ impl State {
     }
 
     fn make_selection(&mut self) -> GameResult {
-        if self.chess_board.get_legal_moves(self.selected_tile_index).is_empty() {
+        if self.chess_board.get_moves_at(self.selected_tile_index).is_empty() {
             return Ok(())
         }
 
-        let selected_piece = self.chess_board.board[self.selected_tile_index];
+        let selected_piece = self.chess_board.get_piece_at(self.selected_tile_index);
 
         match selected_piece.get_color() {
-            WHITE => if self.chess_board.turn == BLACK { return Ok(()) },
-            BLACK => if self.chess_board.turn == WHITE { return Ok(()) },
+            WHITE => if self.chess_board.get_turn() == BLACK { return Ok(()) },
+            BLACK => if self.chess_board.get_turn() == WHITE { return Ok(()) },
             _ => return Ok(())
         }
 
@@ -99,30 +99,17 @@ impl State {
 
     fn make_move(&mut self) -> GameResult {
         if let Some(piece) = self.selected_piece_index {
-            let current_turn = self.chess_board.turn; // Fix for promotion error.
-            for legal_move in self.chess_board.get_legal_moves(piece) {
-                if legal_move.get_from() == piece && legal_move.get_to() == self.selected_tile_index {
+            self.selected_piece_index = None;
+            'moves: for legal_move in self.chess_board.get_moves_at(piece) {
+                if legal_move.from == piece && legal_move.to == self.selected_tile_index {
+                    /* FIX PROMOTION */
                     self.chess_board.make_move(legal_move);
-                    self.selected_piece_index = None;
-                    match self.chess_board.get_game_state() {
-                        GameState::InProgress | 
-                        GameState::Check => (),
-                        GameState::Checkmate |
-                        GameState::DrawBy50MoveRule | 
-                        GameState::InsufficientMaterial | 
-                        GameState::Stalemate => self.is_end = false,
-                    }
-                    // Fix for promotion error.
-                    if current_turn == self.chess_board.turn {
-                        self.chess_board.turn ^= 1;
-                    }
-                } else {
-                    self.selected_piece_index = None;
+                    break 'moves;
                 }
             }
             Ok(())
         } else {
-            Err(GameError::CustomError("No piece to selected".to_string()))
+            Err(GameError::CustomError("No piece selected".to_string()))
         }
     }
 }

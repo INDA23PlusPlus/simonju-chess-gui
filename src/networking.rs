@@ -1,37 +1,55 @@
 extern crate chess_network_protocol;
+extern crate olindba_chess;
 
 use std::net::{TcpListener, TcpStream};
 use ggez::*;
 use chess_network_protocol::*;
+use olindba_chess::{Game, Piece};
 
-pub struct Networking {
-    listener: Option<TcpListener>,
-    stream: Option<TcpStream>,
+use crate::board::Ply;
+
+mod client;
+mod server;
+
+pub struct ClientGame {
+    stream: TcpStream,
+    board: olindba_chess::Game,
+    moves: Vec<Ply>,
+    game_state: Joever,
 }
 
-impl Networking {
-    pub fn host(&mut self, addr: String) -> GameResult {
-        self.disconnect();
+pub struct ServerGame {
+    listener: TcpListener,
+    stream: TcpStream,
+    board: olindba_chess::Game,
+}
 
-        self.listener = Some(TcpListener::bind(addr)?);
-        self.stream = match &self.listener {
-            Some(x) => Some(x.accept()?.0),
-            None => return Err(GameError::CustomError("connection error".to_string())),
-        };
+impl ClientGame {
+    pub fn new(addr: String) -> GameResult<ClientGame> {
+        let stream = TcpStream::connect(addr)?;
+        let board = olindba_chess::Game::starting_position();
+        let moves = vec![];
+        let game_state = Joever::Ongoing;
 
-        Ok(())
+        Ok(Self {
+            stream,
+            board,
+            moves,
+            game_state,
+        })
     }
+}
 
-    pub fn connect(&mut self, addr: String) -> GameResult {
-        self.disconnect();
+impl ServerGame {
+    pub fn new(addr: String) -> GameResult<ServerGame> {
+        let listener = TcpListener::bind(addr)?;
+        let stream = (&listener).accept()?.0;
+        let board = olindba_chess::Game::starting_position();
 
-        self.stream = Some(TcpStream::connect(addr)?);
-
-        Ok(())
-    } 
-
-    pub fn disconnect(&mut self) {
-        self.listener = None;
-        self.stream = None;
+        Ok(Self {
+            listener,
+            stream,
+            board,
+        })
     }
 }

@@ -5,7 +5,7 @@ mod draw;
 mod update;
 mod mouse;
 
-impl ggez::event::EventHandler<GameError> for State {
+impl<T: Board> ggez::event::EventHandler<GameError> for State<T> {
     fn update(&mut self, context: &mut Context) -> GameResult {
         self.handle_update(context)
     }
@@ -42,7 +42,7 @@ impl ggez::event::EventHandler<GameError> for State {
             _repeated: bool,
         ) -> Result<(), GameError> {
         match input.keycode {
-            Some(input::keyboard::KeyCode::R) => self.reset(),
+            Some(input::keyboard::KeyCode::R) => (), // self.reset(),
             _ => (),
         }
         Ok(())

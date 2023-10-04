@@ -10,7 +10,7 @@ const LIGHT: (u8, u8, u8) = (227, 193, 111);
 const SELECT: (u8, u8, u8, u8) = (139, 171, 112, 192);
 const MOVES: (u8, u8, u8, u8) = (173, 216, 230, 128);
 
-impl State {
+impl<T: Board> State<T> {
     pub(crate) fn handle_draw(&mut self, context: &mut Context) -> GameResult {
         let mut canvas = graphics::Canvas::from_frame(context, graphics::Color::BLACK);
         canvas.set_sampler(Sampler::nearest_clamp());
@@ -34,7 +34,7 @@ impl State {
 
         // Pieces Layer
         for tile in 0..64 {
-            if let Ok(image) = self.assets.get_image_from_piece(self.chess_board.board[tile]) {
+            if let Ok(image) = self.assets.get_image_from_piece(self.chess_board.get_piece_at(tile)) {
                 if self.selected_piece_index != Some(tile) {
                     canvas.draw(image, graphics::DrawParam::default()
                     .dest_rect(Self::index_to_rect(tile)));
@@ -63,20 +63,20 @@ impl State {
             Color::from_rgba(MOVES.0, MOVES.1, MOVES.2, MOVES.3),
         )?;
         if let Some(piece) = self.selected_piece_index {
-            for legal_move in self.chess_board.get_legal_moves(piece) {
+            for legal_move in self.chess_board.get_moves_at(piece) {
                 let dst = graphics::Rect::new(
-                    TILE_DIMENSIONS * Self::as_col(legal_move.get_to()),
-                    TILE_DIMENSIONS * Self::as_row(legal_move.get_to()),
+                    TILE_DIMENSIONS * Self::as_col(legal_move.to),
+                    TILE_DIMENSIONS * Self::as_row(legal_move.to),
                     1.0,
                     1.0,
                 );
                 canvas.draw(&moves, graphics::DrawParam::default().dest_rect(dst));
             }
         } else {
-            for legal_move in self.chess_board.get_legal_moves(self.selected_tile_index) {
+            for legal_move in self.chess_board.get_moves_at(self.selected_tile_index) {
                 let dst = graphics::Rect::new(
-                    TILE_DIMENSIONS * Self::as_col(legal_move.get_to()),
-                    TILE_DIMENSIONS * Self::as_row(legal_move.get_to()),
+                    TILE_DIMENSIONS * Self::as_col(legal_move.to),
+                    TILE_DIMENSIONS * Self::as_row(legal_move.to),
                     1.0,
                     1.0,
                 );
@@ -86,7 +86,7 @@ impl State {
 
         // Selected Piece Layer
         if let Some(piece) = self.selected_piece_index {
-            if let Ok(image) = self.assets.get_image_from_piece(self.chess_board.board[piece]) {
+            if let Ok(image) = self.assets.get_image_from_piece(self.chess_board.get_piece_at(piece)) {
                 canvas.draw(image, graphics::DrawParam::default()
                 .dest_rect(Rect::new(self.mouse_pos.x - 32.0, self.mouse_pos.y - 32.0, 4.0, 4.0)));
             }
@@ -100,17 +100,9 @@ impl State {
             16.0,
         );
         match self.chess_board.get_game_state() {
-            GameState::Checkmate => {
-                match self.chess_board.turn {
-                    WHITE => canvas.draw(&self.assets.black_win_screen, graphics::DrawParam::default().dest_rect(screen)),
-                    BLACK => canvas.draw(&self.assets.white_win_screen, graphics::DrawParam::default().dest_rect(screen)),
-                    _ => (),
-                }
-            },
-            GameState::DrawBy50MoveRule | GameState::InsufficientMaterial | GameState::Stalemate => {
-                canvas.draw(&self.assets.draw_screen, graphics::DrawParam::default()
-                .dest_rect(screen));
-            },
+            chess_network_protocol::Joever::White => canvas.draw(&self.assets.white_win_screen, graphics::DrawParam::default().dest_rect(screen)),
+            chess_network_protocol::Joever::Black => canvas.draw(&self.assets.black_win_screen, graphics::DrawParam::default().dest_rect(screen)),     
+            chess_network_protocol::Joever::Draw => canvas.draw(&self.assets.draw_screen, graphics::DrawParam::default().dest_rect(screen)),
             _ => (),
         }
 
