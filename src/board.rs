@@ -2,12 +2,12 @@ use chess_network_protocol::{Move, ServerToClient};
 use olindba_chess::{Game, GameState};
 
 pub(crate) trait Board {
-    fn get_board(&self) -> [olindba_chess::Piece; 64];
+    fn get_board(&self) -> [chess_network_protocol::Piece; 64];
     fn get_turn(&self) -> usize;
     fn get_moves(&self) -> Vec<Ply>;
     fn get_moves_at(&self, i: usize) -> Vec<Ply>;
     fn get_game_state(&self) -> chess_network_protocol::Joever;
-    fn get_piece_at(&self, i: usize) -> olindba_chess::Piece;
+    fn get_piece_at(&self, i: usize) -> Tile;
 
     // Use to make moves and send data
     fn make_move(&mut self, mv: Ply);
@@ -19,28 +19,9 @@ pub(crate) trait Board {
         let mut board = [[chess_network_protocol::Piece::None; 8]; 8];
 
         for (i, p) in self.get_board().iter().enumerate() {
-            board[i_to_x(i)][i_to_y(i)] = match p.get_color() {
-                olindba_chess::WHITE => match p.get_type() {
-                    olindba_chess::PAWN => chess_network_protocol::Piece::WhitePawn,
-                    olindba_chess::BISHOP => chess_network_protocol::Piece::WhiteBishop,
-                    olindba_chess::KNIGHT => chess_network_protocol::Piece::WhiteKnight,
-                    olindba_chess::ROOK => chess_network_protocol::Piece::WhiteRook,
-                    olindba_chess::QUEEN => chess_network_protocol::Piece::WhiteQueen,
-                    olindba_chess::KING => chess_network_protocol::Piece::WhiteKing,
-                    _ => chess_network_protocol::Piece::None,
-                }
-                olindba_chess::BLACK => match p.get_type() {
-                    olindba_chess::PAWN => chess_network_protocol::Piece::BlackPawn,
-                    olindba_chess::BISHOP => chess_network_protocol::Piece::BlackBishop,
-                    olindba_chess::KNIGHT => chess_network_protocol::Piece::BlackKnight,
-                    olindba_chess::ROOK => chess_network_protocol::Piece::BlackRook,
-                    olindba_chess::QUEEN => chess_network_protocol::Piece::BlackQueen,
-                    olindba_chess::KING => chess_network_protocol::Piece::BlackKing,
-                    _ => chess_network_protocol::Piece::None,
-                }
-                _ => chess_network_protocol::Piece::None,
-            }
+            board[i_to_x(i)][i_to_y(i)] = *p;
         }
+
         board
     }
 
@@ -62,8 +43,34 @@ pub(crate) trait Board {
 type LocalGame = Game;
 
 impl Board for LocalGame {
-    fn get_board(&self) -> [olindba_chess::Piece; 64] {
-        self.board
+    fn get_board(&self) -> [chess_network_protocol::Piece; 64] {
+        let mut board = [chess_network_protocol::Piece::None; 64];
+
+        for (index, tile) in self.board.into_iter().enumerate() {
+            board[index] = match tile.get_color() {
+                olindba_chess::WHITE => match tile.get_type() {
+                    olindba_chess::PAWN => chess_network_protocol::Piece::WhitePawn,
+                    olindba_chess::BISHOP => chess_network_protocol::Piece::WhiteBishop,
+                    olindba_chess::KNIGHT => chess_network_protocol::Piece::WhiteKnight,
+                    olindba_chess::ROOK => chess_network_protocol::Piece::WhiteRook,
+                    olindba_chess::QUEEN => chess_network_protocol::Piece::WhiteQueen,
+                    olindba_chess::KING => chess_network_protocol::Piece::WhiteKing,
+                    _ => chess_network_protocol::Piece::None,
+                },
+                olindba_chess::BLACK => match tile.get_type() {
+                    olindba_chess::PAWN => chess_network_protocol::Piece::BlackPawn,
+                    olindba_chess::BISHOP => chess_network_protocol::Piece::BlackBishop,
+                    olindba_chess::KNIGHT => chess_network_protocol::Piece::BlackKnight,
+                    olindba_chess::ROOK => chess_network_protocol::Piece::BlackRook,
+                    olindba_chess::QUEEN => chess_network_protocol::Piece::BlackQueen,
+                    olindba_chess::KING => chess_network_protocol::Piece::BlackKing,
+                    _ => chess_network_protocol::Piece::None,    
+                },
+                _ => chess_network_protocol::Piece::None,
+            }
+        }
+
+        board
     }
 
     fn get_turn(&self) -> usize {
@@ -110,8 +117,9 @@ impl Board for LocalGame {
         }
     }
 
-    fn get_piece_at(&self, i: usize) -> olindba_chess::Piece {
-        self.board[i]
+    fn get_piece_at(&self, i: usize) -> Tile {
+        let piece = self.board[i];
+        Tile::new(piece.get_type(), piece.get_color())
     }
 
     fn make_move(&mut self, mv: Ply) {
@@ -165,3 +173,27 @@ impl Ply {
 pub fn i_to_x(i: usize) -> usize { i % 8 }
 pub fn i_to_y(i: usize) -> usize { i / 8 }
 pub fn xy_to_i(x: usize, y: usize) -> usize { x + y * 8 }
+
+// Copied from olindba_chess because Piece::new() was not public...
+pub struct Tile {
+    tile: usize
+}
+
+impl Tile {
+    pub fn new(tile_type: usize, tile_color: usize) -> Self {
+        Self {
+            tile: ((tile_color & 0x01) << 3) | (tile_type & 0x07)
+        }
+    }
+
+    pub fn empty() -> Self {
+        Self {
+            tile: 0
+        }
+    }
+
+    /// Returns a number between 0 and 6 inclusive, matches the constants EMPTY, PAWN, KNIGHT etc.
+    pub fn get_type(&self) -> usize { return self.tile & 0x07; }
+    /// Returns either 0 or 1, matches the constants WHITE or BLACK
+	pub fn get_color(&self) -> usize { return (self.tile >> 3) & 0x01; }
+}

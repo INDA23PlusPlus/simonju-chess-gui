@@ -16,14 +16,21 @@ mod server;
 type STC = chess_network_protocol::ServerToClient;
 type CTS = chess_network_protocol::ClientToServer;
 
+enum Player {
+    White,
+    Black,
+}
+
 pub struct ClientGame {
-    board: olindba_chess::Game,
+    player: Player,
+    board: [[chess_network_protocol::Piece; 8]; 8],
     moves: Vec<Ply>,
     game_state: Joever,
     tcp_handler: TcpHandler<STC, CTS>,
 }
 
 pub struct ServerGame {
+    player: Player,
     listener: TcpListener,
     board: olindba_chess::Game,
     tcp_handler: TcpHandler<CTS, STC>,
@@ -31,13 +38,15 @@ pub struct ServerGame {
 
 impl ClientGame {
     pub fn new(addr: String) -> GameResult<ClientGame> {
+        let player = Player::Black; // todo
         let stream = TcpStream::connect(addr)?;
-        let board = olindba_chess::Game::starting_position();
+        let board = [[Piece::None; 8]; 8];
         let moves = vec![];
         let game_state = Joever::Ongoing;
         let tcp_handler = TcpHandler::new(stream)?;
 
         Ok(Self {
+            player,
             board,
             moves,
             game_state,
@@ -48,12 +57,14 @@ impl ClientGame {
 
 impl ServerGame {
     pub fn new(addr: String) -> GameResult<ServerGame> {
+        let player = Player::White; // todo
         let listener = TcpListener::bind(addr)?;
         let (stream, _addr) = (&listener).accept()?;
         let board = olindba_chess::Game::starting_position();
         let tcp_handler = TcpHandler::new(stream)?;
 
         Ok(Self {
+            player,
             listener,
             board,
             tcp_handler,

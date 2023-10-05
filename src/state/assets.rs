@@ -1,6 +1,8 @@
 use ggez::*;
 use olindba_chess::*;
 
+use crate::board::Tile;
+
 pub(crate) struct Assets {
     white_pawn: graphics::Image,
     white_bishop: graphics::Image,
@@ -58,7 +60,7 @@ impl Assets {
         })
     }
 
-    pub(crate) fn get_image_from_piece(&self, piece: Piece) -> GameResult<&graphics::Image>{
+    pub(crate) fn get_image_from_piece(&self, piece: Tile) -> GameResult<&graphics::Image>{
         match piece.get_color() {
             WHITE => match piece.get_type() {
                 PAWN => Ok(&self.white_pawn),

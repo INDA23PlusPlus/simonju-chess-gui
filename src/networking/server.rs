@@ -2,14 +2,40 @@ use std::io::{Write, Read};
 use std::sync::mpsc::TryRecvError;
 
 use crate::networking::ServerGame;
-use crate::board::{Board, Ply, xy_to_i};
+use crate::board::{Board, Ply, xy_to_i, Tile};
 use chess_network_protocol::*;
 use olindba_chess::GameState;
 use serde::*;
 
 impl Board for ServerGame {
-    fn get_board(&self) -> [olindba_chess::Piece; 64] {
-        self.board.board
+    fn get_board(&self) -> [chess_network_protocol::Piece; 64] {
+        let mut board = [chess_network_protocol::Piece::None; 64];
+
+        for (index, tile) in self.board.board.into_iter().enumerate() {
+            board[index] = match tile.get_color() {
+                olindba_chess::WHITE => match tile.get_type() {
+                    olindba_chess::PAWN => chess_network_protocol::Piece::WhitePawn,
+                    olindba_chess::BISHOP => chess_network_protocol::Piece::WhiteBishop,
+                    olindba_chess::KNIGHT => chess_network_protocol::Piece::WhiteKnight,
+                    olindba_chess::ROOK => chess_network_protocol::Piece::WhiteRook,
+                    olindba_chess::QUEEN => chess_network_protocol::Piece::WhiteQueen,
+                    olindba_chess::KING => chess_network_protocol::Piece::WhiteKing,
+                    _ => chess_network_protocol::Piece::None,
+                },
+                olindba_chess::BLACK => match tile.get_type() {
+                    olindba_chess::PAWN => chess_network_protocol::Piece::BlackPawn,
+                    olindba_chess::BISHOP => chess_network_protocol::Piece::BlackBishop,
+                    olindba_chess::KNIGHT => chess_network_protocol::Piece::BlackKnight,
+                    olindba_chess::ROOK => chess_network_protocol::Piece::BlackRook,
+                    olindba_chess::QUEEN => chess_network_protocol::Piece::BlackQueen,
+                    olindba_chess::KING => chess_network_protocol::Piece::BlackKing,
+                    _ => chess_network_protocol::Piece::None,    
+                },
+                _ => chess_network_protocol::Piece::None,
+            }
+        }
+
+        board
     }
 
     fn get_turn(&self) -> usize {
@@ -56,7 +82,7 @@ impl Board for ServerGame {
         }
     }
 
-    fn get_piece_at(&self, i: usize) -> olindba_chess::Piece {
+    fn get_piece_at(&self, i: usize) -> Tile {
         self.board.get_piece_at(i)
     }
 
