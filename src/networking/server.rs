@@ -1,3 +1,6 @@
+use std::io::{Write, Read};
+use std::sync::mpsc::TryRecvError;
+
 use crate::networking::ServerGame;
 use crate::board::{Board, Ply, xy_to_i};
 use chess_network_protocol::*;
@@ -83,61 +86,62 @@ impl Board for ServerGame {
         };
 
         // Send state to client
-        debug_assert!(serde_json::to_writer(&self.stream, &state).is_ok());
+        self.tcp_handler.write_sender.send(state);
     }
 
     fn update(&mut self) {
-        let mut de = serde_json::Deserializer::from_reader(&self.stream);
-        if let Ok(deserialized) = ClientToServer::deserialize(&mut de) {
-            println!("Received: {:?}", deserialized);
+        let deserialized = match self.tcp_handler.read_receiver.try_recv() {
+            Ok(x) => x,
+            Err(x) => match x {
+                TryRecvError::Empty => return,
+                TryRecvError::Disconnected => return, // Todo
+            },
+        };
 
-            // Get desired move from client
-            let mut mv = Ply { from: 1337, to: 1337, color: 1337, promotion: 1337 };
-            match deserialized {
-                ClientToServer::Move(m) => {
-                    mv = Ply { 
-                        from: xy_to_i(m.start_x, m.start_y),
-                        to: xy_to_i(m.end_x, m.end_y),
-                        promotion: match m.promotion {
-                            Piece::WhiteBishop | Piece::BlackBishop => olindba_chess::BISHOP_PROMOTION,
-                            Piece::WhiteKnight | Piece::BlackKnight => olindba_chess::KNIGHT_PROMOTION,
-                            Piece::WhiteRook | Piece::BlackRook => olindba_chess::ROOK_PROMOTION,
-                            Piece::WhiteQueen | Piece::BlackQueen => olindba_chess::QUEEN_PROMOTION,
-                            _ => olindba_chess::QUEEN_PROMOTION,
-                        },
-                        color: self.board.turn,
-                    };
-                },
-                ClientToServer::Resign => (), // Optional
-                ClientToServer::Draw => (), // Optional
-            }
-
-            // Make move
-            self.board.make_move_from_to(mv.from, mv.to, mv.promotion);
-
-            // Create state
-            let board = self.create_board();
-            let moves = self.create_moves();
-            let joever = self.get_game_state();
-            let move_made = Move {
-                start_x: mv.fromx(),
-                start_y: mv.fromy(),
-                end_x: mv.tox(),
-                end_y: mv.toy(),
-                promotion: mv.prom(),
-            };
-
-            let state = ServerToClient::State {
-                board,
-                moves,
-                joever,
-                move_made,
-            };
-
-            // Send state to client
-            debug_assert!(serde_json::to_writer(&self.stream, &state).is_ok());
-        } else {
-            return;
+        // Get desired move from client
+        let mut mv = Ply { from: 1337, to: 1337, color: 1337, promotion: 1337 };
+        match deserialized {
+            ClientToServer::Move(m) => {
+                mv = Ply { 
+                    from: xy_to_i(m.start_x, m.start_y),
+                    to: xy_to_i(m.end_x, m.end_y),
+                    promotion: match m.promotion {
+                        Piece::WhiteBishop | Piece::BlackBishop => olindba_chess::BISHOP_PROMOTION,
+                        Piece::WhiteKnight | Piece::BlackKnight => olindba_chess::KNIGHT_PROMOTION,
+                        Piece::WhiteRook | Piece::BlackRook => olindba_chess::ROOK_PROMOTION,
+                        Piece::WhiteQueen | Piece::BlackQueen => olindba_chess::QUEEN_PROMOTION,
+                        _ => olindba_chess::QUEEN_PROMOTION,
+                    },
+                    color: self.board.turn,
+                };
+            },
+            ClientToServer::Resign => (), // Optional
+            ClientToServer::Draw => (), // Optional
         }
+
+        // Make move
+        self.board.make_move_from_to(mv.from, mv.to, mv.promotion);
+
+        // Create state
+        let board = self.create_board();
+        let moves = self.create_moves();
+        let joever = self.get_game_state();
+        let move_made = Move {
+            start_x: mv.fromx(),
+            start_y: mv.fromy(),
+            end_x: mv.tox(),
+            end_y: mv.toy(),
+            promotion: mv.prom(),
+        };
+
+        let state = ServerToClient::State {
+            board,
+            moves,
+            joever,
+            move_made,
+        };
+
+        // Send state to client
+        self.tcp_handler.write_sender.send(state);
     }
 }
