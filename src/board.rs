@@ -4,6 +4,7 @@ use olindba_chess::{Game, GameState};
 pub(crate) trait Board {
     fn get_board(&self) -> [chess_network_protocol::Piece; 64];
     fn get_turn(&self) -> usize;
+    fn get_player(&self) -> usize;
     fn get_moves(&self) -> Vec<Ply>;
     fn get_moves_at(&self, i: usize) -> Vec<Ply>;
     fn get_game_state(&self) -> chess_network_protocol::Joever;
@@ -74,6 +75,10 @@ impl Board for LocalGame {
     }
 
     fn get_turn(&self) -> usize {
+        self.turn
+    }
+
+    fn get_player(&self) -> usize {
         self.turn
     }
 

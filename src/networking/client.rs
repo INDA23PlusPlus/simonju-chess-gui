@@ -17,8 +17,18 @@ impl Board for ClientGame {
     }
 
     fn get_turn(&self) -> usize {
-        todo!()
+        match self.turn {
+            super::Player::White => olindba_chess::WHITE,
+            super::Player::Black => olindba_chess::BLACK,
+        }
         // self.board.turn
+    }
+
+    fn get_player(&self) -> usize {
+        match self.player {
+            super::Player::White => olindba_chess::WHITE,
+            super::Player::Black => olindba_chess::BLACK,
+        }
     }
 
     fn get_moves(&self) -> Vec<Ply> {

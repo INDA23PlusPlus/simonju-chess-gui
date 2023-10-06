@@ -2,7 +2,7 @@ use std::net::{TcpListener, TcpStream};
 use ggez::{*, mint::Point2};
 use olindba_chess::*;
 use assets::*;
-use crate::{board::*, networking::{ServerGame, ClientGame}};
+use crate::{board::*, networking::{ServerGame, ClientGame, Player}};
 
 mod event_handler;
 mod assets;
@@ -22,7 +22,6 @@ impl<T: Board> State<T> {
 
 impl State<ServerGame> {
     pub fn new_server(context: &mut Context, addr: String) -> GameResult<Self> {
-        // Do handshake stuff
         let game_state = Self {
             chess_board: ServerGame::new(addr)?,
             assets: Assets::new(context)?,
@@ -38,10 +37,9 @@ impl State<ServerGame> {
 }
 
 impl State<ClientGame> {
-    pub fn new_client(context: &mut Context, addr: String) -> GameResult<Self> {
-        // Do handshake stuff
+    pub fn new_client(context: &mut Context, player: Player, addr: String) -> GameResult<Self> {
         let game_state = Self {
-            chess_board: ClientGame::new(addr)?,
+            chess_board: ClientGame::new(player, addr)?,
             assets: Assets::new(context)?,
             delta_time: std::time::Duration::new(0, 0),
             selected_tile_index: 0,

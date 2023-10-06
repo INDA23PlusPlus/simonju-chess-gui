@@ -42,6 +42,13 @@ impl Board for ServerGame {
         self.board.turn
     }
 
+    fn get_player(&self) -> usize {
+        match self.player {
+            super::Player::White => olindba_chess::WHITE,
+            super::Player::Black => olindba_chess::BLACK,
+        }
+    }
+
     fn get_moves(&self) -> Vec<Ply> {
         let mut mvs = vec![];
         for mv in self.board.get_all_legal_moves() {

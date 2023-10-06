@@ -61,8 +61,8 @@ impl<T: Board> State<T> {
         let selected_piece = self.chess_board.get_piece_at(self.selected_tile_index);
 
         match selected_piece.get_color() {
-            WHITE => if self.chess_board.get_turn() == BLACK { return Ok(()) },
-            BLACK => if self.chess_board.get_turn() == WHITE { return Ok(()) },
+            WHITE => if self.chess_board.get_player() == BLACK { return Ok(()) },
+            BLACK => if self.chess_board.get_player() == WHITE { return Ok(()) },
             _ => return Ok(())
         }
 
