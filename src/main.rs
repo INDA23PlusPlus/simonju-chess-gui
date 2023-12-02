@@ -40,7 +40,7 @@ fn main() -> GameResult {
             Some('c') => {
                 println!("Choose address:");
                 std::io::stdin().read_line(&mut option)?;
-                let address = option.trim().to_string();
+                let mut address = option.trim().to_string();
                 option.clear();
 
                 println!("Choose player (w, b):");

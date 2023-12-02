@@ -94,12 +94,10 @@ impl Board for ServerGame {
     }
 
     fn make_move(&mut self, mv: Ply) {
-        // Make move
         if !self.board.make_move_from_to(mv.from, mv.to, mv.promotion) {
             return;
         }
 
-        // Create state
         let board = self.create_board();
         let moves = self.create_moves();
         let joever = self.get_game_state();
@@ -118,8 +116,11 @@ impl Board for ServerGame {
             move_made,
         };
 
-        // Send state to client
-        self.tcp_handler.write_sender.send(state);
+        println!("Writing to channel");
+        match self.tcp_handler.write_sender.send(state) {
+            Ok(_) => println!("Success!"),
+            Err(_) => println!("Failure"),
+        };
     }
 
     fn update(&mut self) {
@@ -174,7 +175,10 @@ impl Board for ServerGame {
             move_made,
         };
 
-        // Send state to client
-        self.tcp_handler.write_sender.send(state);
+        println!("Writing to channel");
+        match self.tcp_handler.write_sender.send(state) {
+            Ok(_) => println!("Success!"),
+            Err(_) => println!("Failure"),
+        };
     }
 }

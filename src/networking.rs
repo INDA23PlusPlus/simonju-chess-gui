@@ -46,8 +46,8 @@ impl ClientGame {
 
         let handshake = ClientToServerHandshake {
             server_color: match player {
-                Player::White => Color::White,
-                Player::Black => Color::Black,
+                Player::White => Color::Black,
+                Player::Black => Color::White,
             },
         };
     
@@ -107,7 +107,7 @@ impl ServerGame {
 
         let mut board_state = [[Piece::None; 8]; 8];
         for (i, tile) in board.get_board().into_iter().enumerate() {
-            board_state[i_to_x(i)][i_to_y(i)] = board.get_board()[i];
+            board_state[i_to_y(i)][i_to_x(i)] = board.get_board()[i];
         };
 
         let mut move_state: Vec<chess_network_protocol::Move> = vec![];
@@ -134,6 +134,8 @@ impl ServerGame {
         }
 
         let tcp_handler = TcpHandler::new(stream)?;
+
+        println!("Server color: {}", match player { Player::White => "white", Player::Black => "black" });
 
         Ok(Self {
             player,
@@ -195,12 +197,14 @@ impl<T, S> TcpHandler<T, S>
     }
 
     pub fn write(stream: TcpStream, receiver: Receiver<S>) {
-        match receiver.try_recv() {
-            Ok(state) => serde_json::to_writer(stream, &state),
-            Err(error) => match error {
-                mpsc::TryRecvError::Empty => return,
-                mpsc::TryRecvError::Disconnected => return, // Todo
-            },
-        };
+        loop {
+            match receiver.try_recv() {
+                Ok(state) => serde_json::to_writer(&stream, &state),
+                Err(error) => match error {
+                    mpsc::TryRecvError::Empty => continue,
+                    mpsc::TryRecvError::Disconnected => return, // Todo
+                },
+            };
+        }
     }
 }

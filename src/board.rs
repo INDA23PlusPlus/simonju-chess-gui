@@ -20,7 +20,7 @@ pub(crate) trait Board {
         let mut board = [[chess_network_protocol::Piece::None; 8]; 8];
 
         for (i, p) in self.get_board().iter().enumerate() {
-            board[i_to_x(i)][i_to_y(i)] = *p;
+            board[i_to_y(i)][i_to_x(i)] = *p;
         }
 
         board

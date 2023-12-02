@@ -50,7 +50,7 @@ impl Board for ClientGame {
     }
 
     fn get_piece_at(&self, i: usize) -> Tile {
-        match self.board[i_to_x(i)][i_to_y(i)] {
+        match self.board[i_to_y(i)][i_to_x(i)] {
             chess_network_protocol::Piece::BlackPawn => Tile::new(olindba_chess::PAWN, olindba_chess::BLACK),
             chess_network_protocol::Piece::BlackKnight => Tile::new(olindba_chess::KNIGHT, olindba_chess::BLACK),
             chess_network_protocol::Piece::BlackBishop => Tile::new(olindba_chess::BISHOP, olindba_chess::BLACK),
